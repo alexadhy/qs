@@ -82,7 +82,9 @@ type listField struct {
 
 func (listField *listField) formatFnc(field reflect.Value, result resultFunc) error {
 	if listField.omitEmpty {
-		return nil
+		if field.IsNil() {
+			return nil
+		}
 	}
 	switch listField.arrayFormat {
 	case arrayFormatComma:
