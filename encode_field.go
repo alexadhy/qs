@@ -81,6 +81,9 @@ type listField struct {
 }
 
 func (listField *listField) formatFnc(field reflect.Value, result resultFunc) error {
+	if listField.omitEmpty {
+		return nil
+	}
 	switch listField.arrayFormat {
 	case arrayFormatComma:
 		var str strings.Builder
@@ -198,8 +201,10 @@ func (listField *listField) formatFnc(field reflect.Value, result resultFunc) er
 
 func (e *encoder) newListField(elemTyp reflect.Type, tagName []byte, tagOptions [][]byte) *listField {
 	removeIdx := -1
+	hasOmitEmpty := false
 	for i, tagOption := range tagOptions {
 		if string(tagOption) == tagOmitEmpty {
+			hasOmitEmpty = true
 			removeIdx = i
 		}
 	}
@@ -233,7 +238,8 @@ func (e *encoder) newListField(elemTyp reflect.Type, tagName []byte, tagOptions 
 	}
 
 	listField.baseField = &baseField{
-		name: string(tagName),
+		name:      string(tagName),
+		omitEmpty: hasOmitEmpty,
 	}
 
 	if field, ok := listField.cachedField.(*embedField); ok {
